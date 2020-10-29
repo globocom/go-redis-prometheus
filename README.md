@@ -48,7 +48,7 @@ func main() {
 The hook exports the following metrics:
 
 - Single commands (not pipelined):
-  - Histogram of commands: `redis_single_commands{name="command"}`
+  - Histogram of commands: `redis_single_commands_bucket{name="command"}`
   - Counter of errors: `redis_single_errors{name="command"}`
  - Pipelined commands:
    - Counter of commands: `redis_pipelined_commands{name="command"}`
