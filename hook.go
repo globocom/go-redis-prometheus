@@ -22,7 +22,7 @@ type (
 	//   Counter of commands
 	//   Counter of errors
 	//
-	// Duration of individual pipelined commands won't be collected, but the overall duration of the
+	// The duration of individual pipelined commands won't be collected, but the overall duration of the
 	// pipeline will, with a pseudo-command called "pipeline".
 	Hook struct {
 		options           *Options
