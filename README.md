@@ -22,13 +22,14 @@
 ```golang
 package main
 
-import (                                                         
+import (
     "github.com/go-redis/redis/v8"
     "github.com/globocom/go-redis-prometheus"
 )
 
 func main() {
     hook := redisprom.NewHook(
+        redisprom.WithInstanceName("cache"),
         redisprom.WithNamespace("my_namespace"),
         redisprom.WithDurationBuckets([]float64{.001, .005, .01}),
     )
@@ -48,11 +49,11 @@ func main() {
 The hook exports the following metrics:
 
 - Single commands (not pipelined):
-  - Histogram of commands: `redis_single_commands_bucket{name="command"}`
-  - Counter of errors: `redis_single_errors{name="command"}`
+  - Histogram of commands: `redis_single_commands_bucket{instance="main",command="get"}`
+  - Counter of errors: `redis_single_errors{instance="main",command="get"}`
  - Pipelined commands:
-   - Counter of commands: `redis_pipelined_commands{name="command"}`
-   - Counter of errors: `redis_pipelined_errors{name="command"}`
+   - Counter of commands: `redis_pipelined_commands{instance="main",command="get"}`
+   - Counter of errors: `redis_pipelined_errors{instance="main",command="get"}`
 
 ## Note on pipelines
 
