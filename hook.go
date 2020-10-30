@@ -104,6 +104,8 @@ func (hook *Hook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) 
 	}
 
 	for _, cmd := range cmds {
+		hook.pipelinedCommands.WithLabelValues(hook.options.InstanceName, cmd.Name()).Inc()
+
 		if isActualErr(cmd.Err()) {
 			hook.pipelinedErrors.WithLabelValues(hook.options.InstanceName, cmd.Name()).Inc()
 		}
