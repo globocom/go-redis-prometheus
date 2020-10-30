@@ -16,24 +16,31 @@ import (
 
 func TestHook(t *testing.T) {
 	assert := assert.New(t)
-	namespace := "my_namespace"
 
 	t.Run("create a new hook", func(t *testing.T) {
 		// act
 		sut := redisprom.NewHook()
-		defer sut.Close()
 
 		// assert
 		assert.NotNil(sut)
 	})
 
+	t.Run("do not panic if metrics are already registered", func(t *testing.T) {
+		// arrange
+		_ = redisprom.NewHook()
+
+		// act/assert
+		assert.NotPanics(func() {
+			_ = redisprom.NewHook()
+		})
+	})
+
 	t.Run("export metrics after a command is processed", func(t *testing.T) {
 		// arrange
 		sut := redisprom.NewHook(
-			redisprom.WithNamespace(namespace),
+			redisprom.WithNamespace("namespace1"),
 			redisprom.WithDurationBuckets([]float64{0.1, 0.2}),
 		)
-		defer sut.Close()
 
 		cmd := redis.NewStringCmd(context.TODO(), "get")
 		cmd.SetErr(errors.New("some error"))
@@ -50,18 +57,17 @@ func TestHook(t *testing.T) {
 		assert.Nil(err)
 
 		assert.ElementsMatch([]string{
-			"my_namespace_redis_single_commands",
-			"my_namespace_redis_single_errors",
-		}, filter(metrics, namespace))
+			"namespace1_redis_single_commands",
+			"namespace1_redis_single_errors",
+		}, filter(metrics, "namespace1"))
 	})
 
 	t.Run("export metrics after a pipeline is processed", func(t *testing.T) {
 		// arrange
 		sut := redisprom.NewHook(
-			redisprom.WithNamespace(namespace),
+			redisprom.WithNamespace("namespace2"),
 			redisprom.WithDurationBuckets([]float64{0.1, 0.2}),
 		)
-		defer sut.Close()
 
 		cmd := redis.NewStringCmd(context.TODO(), "get")
 		cmd.SetErr(errors.New("some error"))
@@ -78,9 +84,9 @@ func TestHook(t *testing.T) {
 		assert.Nil(err)
 
 		assert.ElementsMatch([]string{
-			"my_namespace_redis_single_commands",
-			"my_namespace_redis_pipelined_errors",
-		}, filter(metrics, namespace))
+			"namespace2_redis_single_commands",
+			"namespace2_redis_pipelined_errors",
+		}, filter(metrics, "namespace2"))
 	})
 }
 
