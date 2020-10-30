@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 type (
@@ -35,39 +34,47 @@ type (
 	startKey struct{}
 )
 
-var labelNames = []string{"instance", "command"}
+var (
+	labelNames = []string{"instance", "command"}
+)
 
 // NewHook creates a new go-redis hook instance and registers Prometheus collectors.
 func NewHook(opts ...Option) *Hook {
 	options := DefaultOptions()
 	options.Merge(opts...)
 
-	singleCommands := promauto.NewHistogramVec(prometheus.HistogramOpts{
+	singleCommands := register(prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: options.Namespace,
 		Name:      "redis_single_commands",
 		Help:      "Histogram of single Redis commands",
 		Buckets:   options.DurationBuckets,
-	}, labelNames)
+	}, labelNames)).(*prometheus.HistogramVec)
 
-	pipelinedCommands := promauto.NewCounterVec(prometheus.CounterOpts{
+	pipelinedCommands := register(prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: options.Namespace,
 		Name:      "redis_pipelined_commands",
 		Help:      "Number of pipelined Redis commands",
-	}, labelNames)
+	}, labelNames)).(*prometheus.CounterVec)
 
-	singleErrors := promauto.NewCounterVec(prometheus.CounterOpts{
+	singleErrors := register(prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: options.Namespace,
 		Name:      "redis_single_errors",
 		Help:      "Number of single Redis commands that have failed",
-	}, labelNames)
+	}, labelNames)).(*prometheus.CounterVec)
 
-	pipelinedErrors := promauto.NewCounterVec(prometheus.CounterOpts{
+	pipelinedErrors := register(prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: options.Namespace,
 		Name:      "redis_pipelined_errors",
 		Help:      "Number of pipelined Redis commands that have failed",
-	}, labelNames)
+	}, labelNames)).(*prometheus.CounterVec)
 
-	return &Hook{options, singleCommands, pipelinedCommands, singleErrors, pipelinedErrors}
+	return &Hook{
+		options:           options,
+		singleCommands:    singleCommands,
+		pipelinedCommands: pipelinedCommands,
+		singleErrors:      singleErrors,
+		pipelinedErrors:   pipelinedErrors,
+	}
 }
 
 func (hook *Hook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
@@ -105,13 +112,17 @@ func (hook *Hook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) 
 	return nil
 }
 
-// Close unregisters all collectors initialized by NewHook.
-func (hook *Hook) Close() error {
-	prometheus.Unregister(hook.singleCommands)
-	prometheus.Unregister(hook.pipelinedCommands)
-	prometheus.Unregister(hook.singleErrors)
-	prometheus.Unregister(hook.pipelinedErrors)
-	return nil
+func register(collector prometheus.Collector) prometheus.Collector {
+	err := prometheus.DefaultRegisterer.Register(collector)
+	if err == nil {
+		return collector
+	}
+
+	if arErr, ok := err.(prometheus.AlreadyRegisteredError); ok {
+		return arErr.ExistingCollector
+	}
+
+	panic(err)
 }
 
 func isActualErr(err error) bool {
