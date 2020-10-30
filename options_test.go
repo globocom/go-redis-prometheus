@@ -13,7 +13,7 @@ func TestOptions(t *testing.T) {
 
 	t.Run("return default options", func(t *testing.T) {
 		assert.Equal(&redisprom.Options{
-			InstanceName:    "main",
+			InstanceName:    "unnamed",
 			Namespace:       "",
 			DurationBuckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1},
 		}, redisprom.DefaultOptions())

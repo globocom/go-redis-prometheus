@@ -14,7 +14,7 @@ type (
 // DefaultOptions returns the default options.
 func DefaultOptions() *Options {
 	return &Options{
-		InstanceName:    "main",
+		InstanceName:    "unnamed",
 		Namespace:       "",
 		DurationBuckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1},
 	}
