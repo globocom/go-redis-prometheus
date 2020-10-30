@@ -85,6 +85,7 @@ func TestHook(t *testing.T) {
 
 		assert.ElementsMatch([]string{
 			"namespace2_redis_single_commands",
+			"namespace2_redis_pipelined_commands",
 			"namespace2_redis_pipelined_errors",
 		}, filter(metrics, "namespace2"))
 	})
