@@ -13,13 +13,13 @@ type (
 	//
 	// The following metrics are exported:
 	//
-	// Single commands (not-pipelined)
-	//   Histogram of duration
-	//   Counter of errors
+	// - Single commands (not-pipelined)
+	//   - Histogram of duration
+	//   - Counter of errors
 	//
-	// Pipelined commands
-	//   Counter of commands
-	//   Counter of errors
+	// - Pipelined commands
+	//   - Counter of commands
+	//   - Counter of errors
 	//
 	// The duration of individual pipelined commands won't be collected, but the overall duration of the
 	// pipeline will, with a pseudo-command called "pipeline".
