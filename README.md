@@ -60,3 +60,7 @@ The hook exports the following metrics:
 It isn't possible to measure the duration of individual
 pipelined commands, but the duration of the pipeline itself is calculated and 
 exported as a pseudo-command called "pipeline" under the single command metric.
+
+## API stability
+
+The API is unstable at this point and it might change before `v1.0.0` is released.
