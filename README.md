@@ -13,6 +13,8 @@
 
 [go-redis](https://github.com/go-redis/redis) hook that exports Prometheus metrics.
 
+Also check out our lib https://github.com/globocom/go-redis-opentracing.
+
 ## Installation
 
     go get github.com/globocom/go-redis-prometheus
@@ -58,7 +60,7 @@ The hook exports the following metrics:
 ## Note on pipelines
 
 It isn't possible to measure the duration of individual
-pipelined commands, but the duration of the pipeline itself is calculated and 
+pipelined commands, but the duration of the pipeline itself is calculated and
 exported as a pseudo-command called "pipeline" under the single command metric.
 
 ## API stability
